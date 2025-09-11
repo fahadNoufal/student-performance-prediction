@@ -21,5 +21,4 @@ setup(
     packages = find_packages(),
     install_requires = get_requirements("requirements.txt"),
     author = 'Fahad Noufal',
-    # install_requires = [],
 )
