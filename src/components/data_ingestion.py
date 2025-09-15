@@ -4,8 +4,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
 
+from src.components.data_transformation import DataTransformation
 from src.exception import CustomException
 from src.logger import logging
+from src.components.model_trainer import ModelTrainer
 
 @dataclass
 class DataIngestionCongig:
@@ -30,8 +32,8 @@ class DataIngestion:
             
             training_data,testing_data = train_test_split(df,test_size=0.2,random_state=121)
 
-            training_data.to_csv(self.ingestion_config.train_data_path,index=False,header=False)
-            testing_data.to_csv(self.ingestion_config.test_data_path,index=False,header=False)
+            training_data.to_csv(self.ingestion_config.train_data_path,index=False)
+            testing_data.to_csv(self.ingestion_config.test_data_path,index=False)
 
             logging.info("Data Ingestion Completed...")
 
@@ -42,3 +44,13 @@ class DataIngestion:
         except Exception as e:
             raise CustomException(e,sys)
         
+
+if __name__=="__main__":
+    obj = DataIngestion()
+    train,test = obj.initiate_data_ingestion()
+    preprocessor = DataTransformation()
+    train,test = preprocessor.initiate_data_transformation(train,test)
+    model = ModelTrainer()
+    score = model.train_model(train,test)
+    print(score)
+    
