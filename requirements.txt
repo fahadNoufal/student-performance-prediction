@@ -4,5 +4,8 @@ seaborn
 matplotlib
 plotly
 scikit-learn
+fastapi
+dill
+uvicorn
 
 -e .

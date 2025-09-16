@@ -83,7 +83,7 @@ class ModelTrainer:
                 grid = GridSearchCV(
                     estimator=model['model'],
                     param_grid=model['params'],
-                    cv=10
+                    cv=5
                 )
 
                 grid.fit(X_train,y_train)

@@ -4,7 +4,6 @@ from src.exception import CustomException
 import dill
 
 
-
 def save_object(path,obj):
     try:
         dir_path = os.path.dirname(path)
@@ -12,6 +11,15 @@ def save_object(path,obj):
 
         with open(path,'wb') as f:
             dill.dump(obj,f)
+
+    except Exception as e:
+        raise CustomException(e,sys)
+    
+
+def load_object(path):
+    try:
+        with open(path,'rb') as f:
+            return dill.load(f)
 
     except Exception as e:
         raise CustomException(e,sys)
