@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Student Performance Predictor</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #0b1220;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --glass: rgba(255, 255, 255, 0.04);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto,
+          "Helvetica Neue", Arial;
+        margin: 0;
+        background: linear-gradient(180deg, #071025 0%, #071b2b 100%);
+        color: #e6eef6;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .wrap {
+        width: 100%;
+        max-width: 80svw;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+        display: flex;
+        gap: 18px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      h1 {
+        margin: 4px 0 12px;
+        font-size: 20px;
+      }
+      option {
+        background: var(--card);
+        color: inherit;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      select,
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: var(--glass);
+        color: inherit;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row > * {
+        flex: 1;
+      }
+      .controls {
+        display: grid;
+        gap: 12px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(90deg, var(--accent), #3b82f6);
+        color: #04263b;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn.secondary {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+      }
+      .small {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .canvas-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      canvas {
+        background: transparent;
+        border-radius: 8px;
+        width: 80%;
+      }
+      .result {
+        padding: 14px;
+        border-radius: 10px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.01)
+        );
+        text-align: center;
+      }
+      .score {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 6px 0;
+      }
+      .label {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      footer {
+        grid-column: 1/-1;
+        margin-top: 8px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 880px) {
+        .wrap {
+          display: block;
+          max-width: 100svh;
+        }
+        canvas {
+          width: 350px;
+        }
+        .predictionSummary {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Student Performance Predictor</h1>
+        <p class="small">
+          Fill the student's information and enter reading & writing scores on
+          the sliders. The little model below gives an instant prediction of
+          overall performance (client-side demo model).
+        </p>
+
+        <form
+          class="controls"
+          style="margin-top: 12px"
+          id="predictForm"
+          onsubmit="computePrediction2(event);return false"
+        >
+          <div>
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="race">Race / Ethnicity</label>
+            <select id="race" name="race_ethnicity">
+              <option value="group B">group B</option>
+              <option value="group C">group C</option>
+              <option value="group A">group A</option>
+              <option value="group D">group D</option>
+              <option value="group E">group E</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="parent_edu">Parental Level of Education</label>
+            <select id="parent_edu" name="parental_level_of_education">
+              <option>bachelor's degree</option>
+              <option>some college</option>
+              <option>master's degree</option>
+              <option>associate's degree</option>
+              <option>high school</option>
+              <option>some high school</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="lunch">Lunch</label>
+              <select id="lunch" name="lunch">
+                <option value="standard">standard</option>
+                <option value="free/reduced">free/reduced</option>
+              </select>
+            </div>
+            <div>
+              <label for="prep">Test Preparation Course</label>
+              <select id="prep" name="test_preparation_course">
+                <option value="completed">completed</option>
+                <option value="none">none</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="reading">Reading score (<span id="readVal">70</span>)</label>
+            <input
+              id="reading"
+              name="reading_score"
+              type="range"
+              min="0"
+              max="100"
+              value="70"
+            />
+          </div>
+
+          <div>
+            <label for="writing">Writing score (<span id="writeVal">72</span>)</label>
+            <input
+              id="writing"
+              name="writing_score"
+              type="range"
+              min="0"
+              max="100"
+              value="72"
+            />
+          </div>
+
+          <div style="display: flex; gap: 8px">
+            <button type="reset" class="btn secondary" id="reset">Reset</button>
+            <button type="submit" class="btn" id="predict">Predict</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div
+          style="
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <div>
+            <h1 style="font-size: 16px">Prediction & visualization</h1>
+            <p class="small">
+              Interactive canvas shows reading & writing bars. The predictor
+              computes a final score and a performance label.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 12px; margin-top: 12px">
+          <div class="canvas-box card" style="padding: 12px">
+            <canvas id="bars" width="500" height="220"></canvas>
+            <div class="small">
+              Bars: reading vs writing (move sliders to update)
+            </div>
+          </div>
+        </div>
+        <div class="predictionSummary">
+          <div class="result">
+            <div class="label">Predicted Maths score</div>
+            <div class="score" id="predScore">--</div>
+            <div class="label" id="predLabel">--</div>
+            <div style="height: 8px"></div>
+            <div class="small" id="explain">Feature adjustments applied</div>
+          </div>
+
+          <div
+            style="
+              margin-top: 12px;
+              padding: 12px;
+              border-radius: 10px;
+              background: var(--glass);
+              font-size: 13px;
+              color: var(--muted);
+            "
+          >
+            <strong>How this demo model works</strong>
+            <p style="margin: 6px 0 0">
+              It averages reading & writing, then applies small adjustments for
+              demographic/parental features to simulate an interpretable
+              prediction. This is for demonstration only — replace with a real
+              trained model for production use.
+            </p>
+          </div>
+        </div>
+
+        <footer>
+          This is a demo model for predicting maths score of students based on
+          various features.
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // Utility: clamp
+      const clamp = (v, min = 0, max = 100) => Math.max(min, Math.min(max, v));
+
+      const reading = document.getElementById("reading");
+      const writing = document.getElementById("writing");
+      const readVal = document.getElementById("readVal");
+      const writeVal = document.getElementById("writeVal");
+      const canvas = document.getElementById("bars");
+      const ctx = canvas.getContext("2d");
+      const predScoreEl = document.getElementById("predScore");
+      const predLabelEl = document.getElementById("predLabel");
+
+      function drawBars(r, w, m = 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const pad = 24;
+        const barCount = 3;
+        const gap = 0.25 * ((canvas.width - pad * 2) / barCount); // proportional gap
+        const barW = (canvas.width - pad * 2 - gap * (barCount - 1)) / barCount;
+        const maxH = canvas.height - pad * 2 - 20;
+
+        // background grid
+        ctx.strokeStyle = "rgba(255,255,255,0.04)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const y = pad + i * (maxH / 5);
+          ctx.beginPath();
+          ctx.moveTo(pad, y);
+          ctx.lineTo(canvas.width - pad, y);
+          ctx.stroke();
+        }
+
+        // values
+        const mVal = typeof m !== "undefined" && m != null ? m : 0;
+        const rH = (r / 100) * maxH;
+        const wH = (w / 100) * maxH;
+        const mH = (mVal / 100) * maxH;
+
+        // X positions
+        const xR = pad;
+        const xW = xR + barW + gap;
+        const xM = xW + barW + gap;
+
+        // reading
+        ctx.fillStyle = "rgba(96,165,250,0.95)";
+        ctx.fillRect(xR, canvas.height - pad - rH, barW, rH);
+
+        // writing
+        ctx.fillStyle = "rgba(99,102,241,0.95)";
+        ctx.fillRect(xW, canvas.height - pad - wH, barW, wH);
+
+        // maths
+        ctx.fillStyle = "rgba(34,197,94,0.95)";
+        ctx.fillRect(xM, canvas.height - pad - mH, barW, mH);
+
+        // labels
+        ctx.fillStyle = "rgba(230,238,246,0.9)";
+        ctx.font = "14px ui-sans-serif,system-ui,Segoe UI";
+        ctx.fillText("Reading", xR, canvas.height - 6);
+        ctx.fillText("Writing", xW, canvas.height - 6);
+        ctx.fillText("Maths", xM, canvas.height - 6);
+
+        // numeric values
+        ctx.fillStyle = "rgba(230,238,246,0.95)";
+        ctx.font = "12px ui-sans-serif";
+        ctx.fillText(r.toFixed(0), xR + 6, canvas.height - pad - rH - 8);
+        ctx.fillText(w.toFixed(0), xW + 6, canvas.height - pad - wH - 8);
+        ctx.fillText(mVal.toFixed(0), xM + 6, canvas.height - pad - mH - 8);
+      }
+
+      //async      
+
+      async function computePrediction2(event) {
+        event.preventDefault(); // stop refresh
+
+        const form = event.target; // this is the <form>
+
+        const formData = new FormData(form); // ✅ works only if 'form' is a <form>
+        const data = Object.fromEntries(formData.entries());
+
+        // convert ranges
+        data.reading_score = Number(reading.value);
+        data.writing_score = Number(writing.value);
+
+        console.log("Form Data:", data);
+
+        try {
+          const response = await fetch("http://127.0.0.1:8000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (!response.ok) {
+            throw new Error(`Server responded with status: ${response.status}`);
+          }
+
+          const resp_data = await response.json();
+          console.log("Backend response:", resp_data);
+
+          const prediction = parseInt(resp_data.prediction);
+          drawBars(data.reading_score, data.writing_score, prediction);
+          console.log(prediction);
+
+          let label = "";
+          if (prediction >= 90) label = "A (Excellent)";
+          else if (prediction >= 80) label = "B (Very Good)";
+          else if (prediction >= 70) label = "C (Good)";
+          else if (prediction >= 60) label = "D (Needs improvement)";
+          else label = "F (Below expectations)";
+
+          predScoreEl.textContent = prediction;
+          predLabelEl.textContent = label;
+        } catch (error) {
+          console.error("Error during prediction:", error);
+          // You can also update the UI to show an error message
+          predScoreEl.textContent = "Error";
+          predLabelEl.textContent = "Could not connect to server";
+        }
+      }
+
+
+      function updateAll() {
+        const r = Number(reading.value);
+        const w = Number(writing.value);
+        readVal.textContent = r;
+        writeVal.textContent = w;
+        drawBars(r, w);
+      }
+
+      // events
+      reading.addEventListener("input", () => {
+        updateAll();
+      });
+      writing.addEventListener("input", () => {
+        updateAll();
+      });
+
+      document.getElementById("reset").addEventListener("click", () => {
+        reading.value = 70;
+        writing.value = 72;
+        document.getElementById("gender").value = "male";
+        document.getElementById("race").value = "group A";
+        document.getElementById("parent_edu").value = "bachelor's degree";
+        document.getElementById("lunch").value = "standard";
+        document.getElementById("prep").value = "none";
+        predScoreEl.textContent = "--";
+        predLabelEl.textContent = "--";
+        updateAll();
+      });
+      // init
+      updateAll();
+    </script>
+  </body>
+</html>
