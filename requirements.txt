@@ -7,5 +7,6 @@ scikit-learn
 fastapi
 dill
 uvicorn
+jinja2
 
 -e .

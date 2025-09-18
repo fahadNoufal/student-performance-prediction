@@ -1,6 +1,7 @@
 from src.logger import logging
-from fastapi.responses import JSONResponse
-from fastapi import FastAPI
+from fastapi.responses import JSONResponse,HTMLResponse
+from fastapi import FastAPI,Request
+from fastapi.templating import Jinja2Templates
 from api_model import InputForPrediction
 from src.pipeline.predict_pipeline import PredictPipeline
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,8 @@ app.add_middleware(
     CORSMiddleware,
     **cross_origin_config
 )
+
+templates = Jinja2Templates(directory="templates")
 
 @app.post("/predict")
 def predict_score(input:InputForPrediction):
@@ -37,11 +40,6 @@ def predict_score(input:InputForPrediction):
     logging.info(f"Prediction value is: {prediction}")
     return JSONResponse(content={"prediction": prediction})
 
-@app.post("/")
-def test(any):
-    logging.info(f"Rough acted")
-    return JSONResponse(content={"prediction": 77})
-
-# @app.get("/")
-# def index():
-#     return "API is working fine"
+@app.get("/",response_class=HTMLResponse)
+def Home(request: Request):
+    return templates.TemplateResponse("index.html",{"request":request})
